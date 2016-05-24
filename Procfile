@@ -1,1 +1,1 @@
-web: app.o
+web: web-app

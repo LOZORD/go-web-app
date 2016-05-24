@@ -1,0 +1,19 @@
+{
+	"ImportPath": "github.com/lozord/web-app",
+	"GoVersion": "go1.6",
+	"GodepVersion": "v70",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/russross/blackfriday",
+			"Comment": "v1.4-31-g2004188",
+			"Rev": "2004188462c3946efefbdcd91aa83e49b4175bfb"
+		},
+		{
+			"ImportPath": "github.com/shurcooL/sanitized_anchor_name",
+			"Rev": "10ef21a441db47d8b13ebcc5fd2310f636973c77"
+		}
+	]
+}
