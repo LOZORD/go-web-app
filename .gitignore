@@ -4,3 +4,4 @@ routes
 middleware
 book-api
 rand-api
+render
