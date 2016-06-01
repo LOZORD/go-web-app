@@ -12,3 +12,5 @@ e2e/e2e
 unit-testing/testing
 unit-testing/unit-testing
 controller/controller
+**/*.o
+**/*.sqlite
