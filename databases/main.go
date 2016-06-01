@@ -18,9 +18,16 @@ func main() {
 	db := NewDB()
 	loc := ":8080"
 	log.Println("Listening on " + loc)
+	// the default book in our library
 	bookToAdd := Book{"The Giving Tree", "Shel Silverstein"}
 	AddBook(&bookToAdd, db)
-	http.ListenAndServe(loc, ShowBooks(db))
+
+	// now set up at the http stuff...
+	//http.Handle("/", ShowBooks(db))
+	http.Handle("/", http.FileServer(http.Dir("public")))
+	http.Handle("/showBooks", ShowBooks(db))
+	http.Handle("/addBook", HandleAddBook(db))
+	http.ListenAndServe(loc, nil)
 }
 
 func ShowBooks(db *sql.DB) http.Handler {
@@ -35,6 +42,16 @@ func ShowBooks(db *sql.DB) http.Handler {
 		}
 
 		fmt.Fprintf(rw, "The first book is '%s' by '%s'", title, author)
+	})
+}
+
+func HandleAddBook(db *sql.DB) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		bookToAdd := Book{r.FormValue("title"), r.FormValue("author")}
+
+		fmt.Printf("Got body: %v\n", bookToAdd)
+
+		fmt.Fprintf(rw, "A work in progress...")
 	})
 }
 
