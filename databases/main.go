@@ -34,16 +34,38 @@ func main() {
 
 func ShowBooks(db *sql.DB) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		var title string
-		var author string
-
-		err := db.QueryRow("select title, author from books").Scan(&title, &author)
+		fmt.Println("Getting all the books!")
+		allBooks, err := db.Query("select * from books")
 
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 
-		fmt.Fprintf(rw, "The first book is '%s' by '%s'", title, author)
+		defer allBooks.Close()
+
+		library := []Book{}
+
+		for allBooks.Next() {
+			var someBook Book
+
+			rowErr := allBooks.Scan(&someBook.Title, &someBook.Author)
+
+			if rowErr != nil {
+				panic(rowErr)
+			}
+
+			library = append(library, someBook)
+		}
+
+		jsonOutput, jsonErr := json.Marshal(library)
+
+		if jsonErr != nil {
+			http.Error(rw, jsonErr.Error(), http.StatusInternalServerError)
+		}
+
+		rw.Header().Set("Content-Type", "application/json")
+
+		rw.Write(jsonOutput)
 	})
 }
 
