@@ -12,14 +12,15 @@
       </div>
       <div>
         <h2>Add A Book</h2>
-        <form id='add-form' action='/addBook' method='POST'>
+        <div id='alerts'></div>
+        <form id='add-form'>
           <div class='form-group'>
             <label for='title'>Book Title</label>
-            <input name='title' placeholder='Title'></input>
+            <input id='title-input' name='title' placeholder='Title'></input>
           </div>
           <div class='form-group'>
             <label for='author'>Book Author</label>
-            <input name='author' placeholder='Author'></input>
+            <input id='author-input' name='author' placeholder='Author'></input>
           </div>
           <div class='form-group'>
             <input type='submit'></input>
@@ -27,11 +28,35 @@
         </form>
       </div>
     </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
     <script>
-      document
-      .getElementById('add-form')
-      .addEventListener('submit', function(event) {
-        event.preventDefault();
+      console.log('should exist', $);
+      $(function() {
+          $('#add-form').submit(function(event) {
+            event.preventDefault();
+            var newBook = {
+              title: $('#title-input').val().trim(),
+              author: $('#author-input').val().trim()
+            };
+
+            console.log('sending: ', newBook);
+
+            $.post('http://localhost:8080/addBook', newBook)
+            .then(function(data) {
+              console.log('SUCCESS!', data);
+              if (data.bookAdded) {
+                console.log('book was added!');
+                $('<span>Added ' + newBook.title + '!</span>').appendTo($('#alerts')).fadeOut(5000);
+              } else {
+                console.log('book was not added');
+                $('<span>' + newBook.title + ' already exists in the Book Base!</span>').appendTo($('#alerts')).fadeOut(5000);
+              }
+            },function(data, textStatus, error) {
+                console.log('FAILURE!');
+                console.log(arguments);
+                console.log(error);
+            });
+          });
       });
     </script>
   </body>
