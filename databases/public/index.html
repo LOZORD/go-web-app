@@ -32,31 +32,48 @@
     <script>
       console.log('should exist', $);
       $(function() {
-          $('#add-form').submit(function(event) {
-            event.preventDefault();
-            var newBook = {
-              title: $('#title-input').val().trim(),
-              author: $('#author-input').val().trim()
-            };
+        $('#add-form').submit(function(event) {
+          event.preventDefault();
+          var newBook = {
+            title: $('#title-input').val().trim(),
+            author: $('#author-input').val().trim()
+          };
 
-            console.log('sending: ', newBook);
+          console.log('sending: ', newBook);
 
-            $.post('http://localhost:8080/addBook', newBook)
-            .then(function(data) {
-              console.log('SUCCESS!', data);
-              if (data.bookAdded) {
-                console.log('book was added!');
-                $('<span>Added ' + newBook.title + '!</span>').appendTo($('#alerts')).fadeOut(5000);
-              } else {
-                console.log('book was not added');
-                $('<span>' + newBook.title + ' already exists in the Book Base!</span>').appendTo($('#alerts')).fadeOut(5000);
-              }
-            },function(data, textStatus, error) {
-                console.log('FAILURE!');
-                console.log(arguments);
-                console.log(error);
-            });
+          $.post('http://localhost:8080/addBook', newBook)
+          .then(function(data) {
+            console.log('SUCCESS!', data);
+
+            var alertDiv = $('<div>');
+
+            if (data.bookAdded) {
+              console.log('book was added!');
+              //$('<div>Added ' + newBook.title + '!<br></div>').appendTo($('#alerts')).fadeOut(5000);
+              alertDiv
+              .text('Added ' + data.title + '!')
+              .append('<br>')
+              .appendTo($('#alerts'))
+              .fadeOut(3000);
+            } else {
+              console.log('book was not added');
+              //$('<div>' + newBook.title + ' already exists in the Book Base!<br></div>').appendTo($('#alerts')).fadeOut(5000);
+              alertDiv
+              .text(data.title + ' already exists in the Book Base!')
+              .append('<br>')
+              .appendTo($('#alerts'))
+              .fadeOut(3000);
+            }
+          },function(data, textStatus, error) {
+              console.log('FAILURE!');
+              console.log(arguments);
+              console.log(error);
           });
+        });
+
+        function getLibrary() {
+          console.log('TODO');
+        }
       });
     </script>
   </body>

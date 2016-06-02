@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 type Book struct {
 	Title  string `json:"title"`
 	Author string `json:"author"`
+	Added  bool   `json:"bookAdded"`
 }
 
 func main() {
@@ -19,7 +21,7 @@ func main() {
 	loc := ":8080"
 	log.Println("Listening on " + loc)
 	// the default book in our library
-	bookToAdd := Book{"The Giving Tree", "Shel Silverstein"}
+	bookToAdd := Book{Title: "The Giving Tree", Author: "Shel Silverstein"}
 	AddBook(&bookToAdd, db)
 
 	// now set up at the http stuff...
@@ -47,11 +49,24 @@ func ShowBooks(db *sql.DB) http.Handler {
 
 func HandleAddBook(db *sql.DB) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		bookToAdd := Book{r.FormValue("title"), r.FormValue("author")}
+		bookToAdd := Book{
+			Title:  r.FormValue("title"),
+			Author: r.FormValue("author"),
+		}
 
 		fmt.Printf("Got body: %v\n", bookToAdd)
 
-		fmt.Fprintf(rw, "A work in progress...")
+		AddBook(&bookToAdd, db)
+
+		jsonOutput, jsonErr := json.Marshal(bookToAdd)
+
+		if jsonErr != nil {
+			http.Error(rw, jsonErr.Error(), http.StatusInternalServerError)
+		}
+
+		rw.Header().Set("Content-Type", "application/json")
+
+		rw.Write(jsonOutput)
 	})
 }
 
@@ -79,6 +94,7 @@ func AddBook(book *Book, db *sql.DB) bool {
 	if dupError != nil {
 		panic(dupError)
 	} else if dupExists {
+		book.Added = false
 		return false
 	} else {
 		// we are ok to insert a new entry
@@ -90,6 +106,7 @@ func AddBook(book *Book, db *sql.DB) bool {
 	if insertError != nil {
 		panic(insertError)
 	} else {
+		book.Added = true
 		return true
 	}
 }
